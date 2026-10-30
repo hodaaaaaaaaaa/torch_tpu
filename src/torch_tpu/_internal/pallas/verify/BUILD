@@ -40,6 +40,7 @@ torch_tpu_py_library(
     srcs = ["fx_verifier.py"],
     deps = [
         ":findings",
+        "//shims/jax:pallas",
         "//shims/jax:pallas_tpu",
         "//shims/torch:pytorch",
         "//src/torch_tpu/_internal/pallas:pallas_lib",
@@ -58,11 +59,38 @@ torch_tpu_py_library(
 )
 
 torch_tpu_py_library(
+    name = "jaxpr_model",
+    srcs = ["jaxpr_model.py"],
+    deps = [
+        ":findings",
+        ":fx_verifier",
+        "//shims/jax:pallas",
+        "//shims/jax:pallas_tpu",
+        "//shims/torch:pytorch",
+        "//src/torch_tpu/_internal/pallas:pallas_lib",
+        "@pypi//jax",
+        "@pypi//numpy",
+    ],
+)
+
+torch_tpu_py_library(
+    name = "smt_checker",
+    srcs = ["smt_checker.py"],
+    deps = [
+        ":findings",
+        ":jaxpr_model",
+        "//shims/ortools:optional",  # build_cleaner: keep
+    ],
+)
+
+torch_tpu_py_library(
     name = "verifier",
     srcs = ["verifier.py"],
     deps = [
         ":findings",
         ":fx_verifier",
+        ":jaxpr_model",
+        ":smt_checker",
         "//shims/torch:pytorch",
         "//src/torch_tpu/_internal/utils:annotations",
         "@pypi//jax",
